@@ -152,7 +152,6 @@ class CadastroCliente:
             print("Não há mulheres com aluguéis acima de 7 dias.")
 
 def main():
-    import os
     cadastro = CadastroCliente()
 
     while True:
