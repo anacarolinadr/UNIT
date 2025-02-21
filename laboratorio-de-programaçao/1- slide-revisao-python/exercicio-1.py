@@ -17,167 +17,134 @@
 
 # Obs.: o programa encerra quando o usuário informa o texto SAIR.
 
-class CadastroCliente:
+# Ainda que os exercícios sejam simples, resolvi desenvolê-los com POO a fim de aprimorar meus conhecimentos
 
-    def __init__(self):
-        self.nome = ""
-        self.sexo = ""
-        self.placa = ""
-        self.km_contratados = 0
-        self.dias_contratados = 0
-        self.valor = 0
-        self.lista_clientes = []
+# Camada Domínio
+class Cliente:
+    def __init__(self, nome, sexo, placa, km_contratados, dias_contratados):
+        self.nome = nome
+        self.sexo = sexo
+        self.placa = placa
+        self.km_contratados = km_contratados
+        self.dias_contratados = dias_contratados
+        self.valor = self.calcular_valor()
 
-    def conferir_nome(self):
-        while True:
-            nome = input("Nome completo: ").strip()
-            if nome:
-                self.nome = nome
-                return self.nome
-            print("Nome inválido, digite novamente")
-
-    def conferir_sexo(self):
-        while True:
-            sexo = input("Gênero: (F ou M) ").strip().upper()
-            if sexo in ["F", "M"]:
-                self.sexo = sexo
-                return self.sexo
-            else: 
-                print("Gênero inválido, digite novamente (F ou M)")
-
-    def conferir_placa(self):
-        while True:
-            placa = input("Placa do veículo: ").strip().upper()
-            if len(placa) == 7 and placa[:3].isalpha():
-                formato_antigo = placa[3:].isdigit() #LLLNNNN - formato antigo das placas
-                formato_novo = placa[3].isdigit() and placa[4].isalpha() and placa[5:].isdigit() #LLLNLNN - formato novo das placas
-                
-                if formato_antigo or formato_novo:
-                    self.placa = placa
-                    return self.placa
-            
-            print("Formato inválido. Use o padrão ABC1234 ou ABC1D23")
-
-    def conferir_km(self):
-        while True:
-            km_contratados = input("Quantidade de quilômetros contratados: ").strip().lower()
-            if km_contratados.endswith("km"):
-                km_contratados = km_contratados[:-2] 
-            
-            try:
-                km_contratados = float(km_contratados)
-                if km_contratados >= 1:
-                    self.km_contratados = km_contratados
-                    return self.km_contratados
-                else:
-                    print("Valor inválido para quilometragem, digite um valor inteiro")
-
-            except ValueError:
-                print("Valor inválido para quilometragem, digite um número")
-
-    def conferir_dias(self):
-        while True:
-            dias_contratados = input("Quantidade de dias contratados: ").strip()
-            try:
-                dias_contratados = float(dias_contratados)
-                if dias_contratados >= 1:
-                    self.dias_contratados = dias_contratados
-                    return self.dias_contratados
-                else:
-                    print("Valor inválido para dias, digite um valor inteiro")
-
-            except ValueError:
-                print("Valor inválido para dias, digite um número")
-    
     def calcular_valor(self):
-        valor = (self.dias_contratados * 70) + (self.km_contratados * 0.1)
-        self.valor = valor
-        return self.valor
+        return (self.dias_contratados * 70) + (self.km_contratados * 0.1)
+
+# Camada de Serviço
+class CadastroCliente:
+    def __init__(self):
+        self.lista_clientes = []
+        self.lista_mulher_aluguel_sete_dias = []
     
-    def adicionar_cliente(self):
-
-        nome = self.conferir_nome()
-        sexo = self.conferir_sexo()
-        placa = self.conferir_placa()
-        km_contratados = self.conferir_km()
-        dias_contratados = self.conferir_dias()
-        valor = self.calcular_valor() 
-
-        cliente = {
-            "nome": nome,
-            "sexo": sexo,
-            "placa": placa,
-            "km_contratados": km_contratados,
-            "dias_contratados": dias_contratados,
-            "valor": valor
-        }
-
+    def adicionar_cliente(self, cliente):
         self.lista_clientes.append(cliente)
-        print("\nCliente cadastrado com sucesso!")
-        return self.lista_clientes
-     
-    def imprimir_valor(self):
+
+    def calcular_media_km(self):
         if not self.lista_clientes:
             print("Não há clientes cadastrados no sistema.")
-            return
-        print("\nLista de Clientes:")
-        for i, cliente in enumerate(self.lista_clientes, 1):
-            print(f"Cliente {i}")
-            print(f"Placa do carro: {cliente['placa']}")
-            print(f"Valor total: R$ {cliente['valor']:.2f}")
-        
-    def imprimir_media_km(self):
+            return 0
+
+        media_km = sum(cliente.km_contratados for cliente in self.lista_clientes) / len(self.lista_clientes)
+        return media_km  
+
+    def calcular_mulheres_aluguel_mais_sete_dias(self):
         if not self.lista_clientes:
             print("Não há clientes cadastrados no sistema.")
-            return
-        
-        soma_km = sum(cliente['km_contratados'] for cliente in self.lista_clientes)
-        media = soma_km / len(self.lista_clientes)
-    
-        print("\nEstatísticas de Quilometragem:")
-        print(f"Média dos quilômetros contratados: {media:.2f} km ")
+            return []
 
-    def imprimir_mulheres_aluguel_7_dias(self):
-        if not self.lista_clientes:
-            print("Não há clientes cadastrados no sistema.")
-            return
+        self.lista_mulher_aluguel_sete_dias = [
+            cliente for cliente in self.lista_clientes if cliente.sexo == "F" and cliente.dias_contratados > 7
+        ]
 
-        encontrou_mulheres = False
-        for cliente in self.lista_clientes:
-            if cliente["sexo"] == "F" and cliente["dias_contratados"] > 7:
-                print(f"Cliente: {cliente['nome']}")
-                encontrou_mulheres = True
-        
-        if not encontrou_mulheres:
-            print("Não há mulheres com aluguéis acima de 7 dias.")
+        return self.lista_mulher_aluguel_sete_dias
 
+# Camada de Entrada de Dados
+def solicitar_dados():
+    nome = input("Nome completo: ").strip()
+
+    while True:
+        sexo = input("Gênero: (F ou M) ").strip().upper()
+        if sexo in ["F", "M"]:
+            break
+        print("Gênero inválido, digite novamente (F ou M)")
+
+    while True:
+        placa = input("Placa do veículo: ").strip().upper()
+        if len(placa) == 7 and placa[:3].isalpha():
+            formato_antigo = placa[3:].isdigit()
+            formato_novo = placa[3].isdigit() and placa[4].isalpha() and placa[5:].isdigit()
+            if formato_antigo or formato_novo:
+                break
+        print("Formato inválido. Use o padrão ABC1234 ou ABC1D23")
+
+    while True:
+        try:
+            km_contratados = float(input("Quantidade de quilômetros contratados: ").strip())
+            if km_contratados >= 1:
+                break
+            print("Valor inválido para quilometragem, digite um número maior que 0")
+        except ValueError:
+            print("Valor inválido, digite um número")
+
+    while True:
+        try:
+            dias_contratados = int(input("Quantidade de dias contratados: ").strip())
+            if dias_contratados >= 1:
+                break
+            print("Valor inválido para dias, digite um número maior que 0")
+        except ValueError:
+            print("Valor inválido, digite um número inteiro")
+
+    return Cliente(nome, sexo, placa, km_contratados, dias_contratados)
+
+# Camada de Apresentação
 def main():
     cadastro = CadastroCliente()
 
     while True:
         print("\nBem-vindo à Locadora de Veículos!")
-        print("Digite o número da opção desejada:")
         print("1- Adicionar um novo cliente ao sistema")
         print("2- Listar as placas cadastradas e os respectivos valores")
         print("3- Calcular média dos quilômetros rodados por clientes")
         print("4- Listar clientes mulheres que alugaram acima de 7 dias")
-        print("5- Sair \n")
-        
+        print("5- Sair\n")
+
         opcao_usuario = input("Número da opção: ")
 
-        if opcao_usuario == "1" or opcao_usuario.lower() == "um":
-            cadastro.adicionar_cliente()
-        elif opcao_usuario == "2" or opcao_usuario.lower() == "dois":
-            cadastro.imprimir_valor()
-        elif opcao_usuario == "3" or opcao_usuario.lower() == "tres":
-            cadastro.imprimir_media_km()
-        elif opcao_usuario == "4" or opcao_usuario.lower() == "quatro":
-            cadastro.imprimir_mulheres_aluguel_7_dias()
-        elif opcao_usuario == "5" or opcao_usuario.lower() == "sair":
+        if opcao_usuario == "1":
+            cliente = solicitar_dados()
+            cadastro.adicionar_cliente(cliente)
+            print("\nCliente cadastrado com sucesso!")
+
+        elif opcao_usuario == "2":
+            if not cadastro.lista_clientes:
+                print("Não há clientes cadastrados no sistema.")
+                continue
+            print("\nLista de Clientes:")
+            for cliente in cadastro.lista_clientes:
+                print(f"Placa: {cliente.placa}\nValor total: R$ {cliente.valor:.2f}")
+
+        elif opcao_usuario == "3":
+            media_km = cadastro.calcular_media_km()
+            print(f"Média dos quilômetros contratados: {media_km:.2f} km")
+
+        elif opcao_usuario == "4":
+            mulheres = cadastro.calcular_mulheres_aluguel_mais_sete_dias()
+            if mulheres:
+                print("\nLista de clientes mulheres com aluguel acima de 7 dias:")
+                for cliente in mulheres:
+                    print(f"Nome: {cliente.nome}")
+            else:
+                print("Não há mulheres com aluguéis acima de 7 dias.")
+
+        elif opcao_usuario == "5":
             print("Saindo do sistema...")
             break
+
         else:
-            print("Opção inválida, digite novamente")
+            print("Opção inválida, digite novamente.")
 
 if __name__ == "__main__":
     main()
