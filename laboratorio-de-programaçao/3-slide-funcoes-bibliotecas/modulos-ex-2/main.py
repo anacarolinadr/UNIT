@@ -29,7 +29,7 @@ while True:
         except ValueError:
             print("Valor inválido para opção, digite dois números")
 
-    elif opcao.lower() == "3" or "sair":
+    elif opcao== "3" or opcao.lower() == "sair":
         break
     
     else:
